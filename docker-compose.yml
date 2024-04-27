@@ -1,0 +1,15 @@
+version: "3"
+services:
+  snake-game-multiplayer:
+    container_name: snake-game-multiplayer
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      args:
+        DEPLOY_ENV: "test-ci-cd"
+    image: "snake-game-multiplayer:latest"
+    restart: unless-stopped
+    env_file: ./.env
+    network_mode: "bridge"
+    ports:
+      - "43001:3001"
