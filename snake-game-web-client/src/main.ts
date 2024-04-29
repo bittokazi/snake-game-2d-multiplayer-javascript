@@ -8,7 +8,7 @@ let room: any = {};
 let w: any = window;
 
 function gameStart(data: any) {
-  console.log("game start", data);
+  console.log("✈️ Game start log ➡️", data);
   room = data;
   document.getElementById("game").style.display = "block";
   gameEngine = new GameEngine().initialize(
@@ -56,7 +56,7 @@ function showScoreBoard(winner: any = null) {
 let uuid = Math.random().toString(36).substring(7);
 let socket = io(Config.API_BASE_URL);
 socket.on("connect", () => {
-  console.log("Socket Connected");
+  console.log("🔗 Socket Connected");
 
   socket.on("game.room.game.start", (data) => {
     console.log("game.room.game.start");
@@ -64,7 +64,7 @@ socket.on("connect", () => {
   });
 
   socket.on("game.room.player.join", (data) => {
-    console.log("player joined", data);
+    console.log("👤 Player joined", data);
   });
 
   socket.on("game.room.game.position.update", (data) => {
@@ -80,28 +80,30 @@ socket.on("connect", () => {
   });
 
   socket.on("game.room.game.end", (data) => {
-    console.log("game.room.game.end", data);
+    console.log("🔚 game.room.game.end", data);
     gameEngine.endGame();
   });
 });
 
 w["startGame"] = () => {
+  console.log("✈️ Game start requested");
   socket.emit(
     "game.request.game.start",
     { room: { id: uuid } },
     (data: any) => {
       gameStart(data);
+      console.log("⚡ Game start request successfull");
     }
   );
 };
 
 w["createRoom"] = () => {
-  console.log("Create Room");
+  console.log("📨 Create room request sent");
   socket.emit(
     "game.request.room.create",
     { id: uuid, target: 10 },
     (data: any) => {
-      console.log("created room", data);
+      console.log("📊 Created room log ➡️ ", data);
       document.getElementById("room-id").innerHTML = uuid;
       document.getElementById("room-id").style.display = "block";
       document.getElementById("create-room").style.display = "none";
@@ -110,6 +112,7 @@ w["createRoom"] = () => {
       room = {
         id: uuid,
       };
+      console.log("✅ Room created successfully");
     }
   );
 };

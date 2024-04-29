@@ -124,9 +124,11 @@ export class Snake {
         }
         // wall collision check
         if (
-          this.gridSystem.grids.length < this.body[this.body.length - 1].x ||
+          this.gridSystem.grids.length - 1 <
+            this.body[this.body.length - 1].x ||
           0 > this.body[this.body.length - 1].x ||
-          this.gridSystem.grids[0].length < this.body[this.body.length - 1].y ||
+          this.gridSystem.grids[0].length - 1 <
+            this.body[this.body.length - 1].y ||
           0 > this.body[this.body.length - 1].y
         ) {
           this.dead = true;

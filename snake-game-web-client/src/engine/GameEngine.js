@@ -80,7 +80,7 @@ export class GameEngine {
     );
     this.startTimer = new Timer(1000, GAME_START_TIME, (count) => {
       this.startText.update(`Game Starts in ${count}`);
-      console.log(`Game Starts in ${count}`);
+      console.log(`⏳ Game Starts in ${count}`);
       if (count == 0) {
         this.started = true;
       }
@@ -96,7 +96,7 @@ export class GameEngine {
     //   "yellow"
     // ).init();
     new InputController((movement) => {
-      console.log(movement);
+      console.log("💠 Move command ⏩ ", movement);
       if (this.started) {
         this.snakes[uuid].move(movement);
         sendMove({
