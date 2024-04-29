@@ -1,6 +1,8 @@
 import { Food } from "../app/Food";
 import { InputController } from "../app/InputController";
 import { Snake } from "../app/Snake";
+import { TextObject } from "../app/TextObject";
+import { Timer } from "../app/Timer";
 import { GridSystem } from "./GridSystem";
 
 export class GameEngine {
@@ -11,7 +13,8 @@ export class GameEngine {
   }
 
   initialize(bgColor, uuid, room, sendMove, sendEat) {
-    console.log("Game Engine Initiated");
+    console.log("⏳ Starting Game Engine...");
+    const GAME_START_TIME = 5;
     this.uuid = uuid;
     this.sendEat = sendEat;
     this.snakes = {};
@@ -24,7 +27,9 @@ export class GameEngine {
       30
     ).generateGrid(false);
     this.end = false;
+    this.lost = false;
     this.room = room;
+    this.started = false;
     //).testGrid();
     this.food = new Food(
       // this.generateFoodPosition(),
@@ -43,9 +48,44 @@ export class GameEngine {
         this.food,
         player.fillColor,
         player.id == uuid ? sendEat : null,
-        this.end
+        this.end,
+        player.id == uuid ? this.lostListner : null
       ).init();
+      this.yourColorText = new TextObject(
+        this.context,
+        `Your color ${player.fillColor}`,
+        parseInt(this.canvas.width / 2) - 210,
+        parseInt(this.canvas.height / 2) - 70,
+        player.fillColor
+      );
     });
+    this.loseText = new TextObject(
+      this.context,
+      "You Lose",
+      parseInt(this.canvas.width / 2) - 100,
+      parseInt(this.canvas.height / 2) - 40
+    );
+    this.winText = new TextObject(
+      this.context,
+      "You Win",
+      parseInt(this.canvas.width / 2) - 85,
+      parseInt(this.canvas.height / 2) - 40
+    );
+    this.startText = new TextObject(
+      this.context,
+      `Game Starts in ${GAME_START_TIME}`,
+      parseInt(this.canvas.width / 2) - 210,
+      parseInt(this.canvas.height / 2) - 10,
+      "rgb(76, 86, 106)"
+    );
+    this.startTimer = new Timer(1000, GAME_START_TIME, (count) => {
+      this.startText.update(`Game Starts in ${count}`);
+      console.log(`Game Starts in ${count}`);
+      if (count == 0) {
+        this.started = true;
+      }
+    });
+    this.startTimer.start();
     // this.snake = new Snake(
     //   10,
     //   0,
@@ -57,18 +97,20 @@ export class GameEngine {
     // ).init();
     new InputController((movement) => {
       console.log(movement);
-      this.snakes[uuid].move(movement);
-      sendMove({
-        movement,
-        gridX: this.snakes[uuid].gridX,
-        gridY: this.snakes[uuid].gridY,
-        body: this.snakes[uuid].body,
-        directionQueue: this.snakes[uuid].directionQueue,
-      });
-
+      if (this.started) {
+        this.snakes[uuid].move(movement);
+        sendMove({
+          movement,
+          gridX: this.snakes[uuid].gridX,
+          gridY: this.snakes[uuid].gridY,
+          body: this.snakes[uuid].body,
+          directionQueue: this.snakes[uuid].directionQueue,
+        });
+      }
       //this.snake.move(movement);
     }).init();
     this.update();
+    console.log("🚀 Game Engine Initiated");
     return this;
   }
 
@@ -90,10 +132,23 @@ export class GameEngine {
       this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
       //this.snake.update();
       Object.values(this.snakes).map((snake) => {
-        snake.update();
+        if (this.started) {
+          snake.update();
+        }
         snake.draw();
       });
-      this.food.draw();
+      if (this.lost) {
+        this.loseText.draw();
+      } else if (this.end && !this.lost) {
+        this.winText.draw();
+      }
+      if (!this.end) {
+        this.food.draw();
+      }
+      if (!this.started) {
+        this.startText.draw();
+        this.yourColorText.draw();
+      }
       this.context.restore();
       requestAnimationFrame(canvas);
     };
@@ -122,6 +177,10 @@ export class GameEngine {
       this.snakes[this.uuid].eaten();
     }
   }
+
+  lostListner = () => {
+    this.lost = true;
+  };
 
   endGame() {
     this.end = true;

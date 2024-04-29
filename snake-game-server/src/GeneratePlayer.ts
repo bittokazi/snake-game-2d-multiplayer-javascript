@@ -26,7 +26,7 @@ export function generatePlayer(i: Number) {
       fillColor: "blue",
     };
   }
-  if (i == 2) {
+  if (i == 3) {
     return {
       gridX: 19,
       gridY: 10,

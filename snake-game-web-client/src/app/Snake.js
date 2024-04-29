@@ -8,7 +8,8 @@ export class Snake {
     food,
     fillColor,
     sendEat,
-    end
+    end,
+    lostListner
   ) {
     this.gridX = gridX;
     this.gridY = gridY;
@@ -25,6 +26,7 @@ export class Snake {
     this.sendEat = sendEat;
     this.dead = false;
     this.end = end;
+    this.lostListner = lostListner;
     return this;
   }
 
@@ -86,9 +88,8 @@ export class Snake {
   }
 
   update() {
-    
     if (this.updateTime > 1000 / this.SPEED) {
-      if(!this.dead && !this.end) {
+      if (!this.dead && !this.end) {
         if (this.directionQueue.length > 0) {
           this.updateLock = true;
           for (let i = 0; i < this.directionQueue.length; i++) {
@@ -109,7 +110,7 @@ export class Snake {
           }
           this.updateLock = false;
         }
-  
+
         for (let i = 0; i < this.body.length; i++) {
           if (this.body[i].direction == "right") {
             this.body[i].y++;
@@ -122,13 +123,17 @@ export class Snake {
           }
         }
         // wall collision check
-        if(this.gridSystem.grids.length<this.body[this.body.length - 1].x || 0>this.body[this.body.length - 1].x 
-          || this.gridSystem.grids[0].length<this.body[this.body.length - 1].y ||  0> this.body[this.body.length - 1].y ) {
+        if (
+          this.gridSystem.grids.length < this.body[this.body.length - 1].x ||
+          0 > this.body[this.body.length - 1].x ||
+          this.gridSystem.grids[0].length < this.body[this.body.length - 1].y ||
+          0 > this.body[this.body.length - 1].y
+        ) {
           this.dead = true;
+          if (this.lostListner) this.lostListner();
         }
-        
       }
-      
+
       this.updateTime = 0;
     }
     this.updateTime += 30;
@@ -184,7 +189,6 @@ export class Snake {
       // this.food.y = this.generateFoodPosition();
     }
     // }
-    
   }
 
   generateFoodPosition() {

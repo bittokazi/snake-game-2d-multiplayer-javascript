@@ -6,67 +6,85 @@
     <title>Snake 2D Multiplayer</title>
   </head>
   <body>
-    <div style="position: relative; width: 100%; display: none" id="game">
-      <div style="width: 100%; float: left">
-        <canvas id="canvas" width="600" height="600"></canvas>
-      </div>
-      <div style="width: 800px; float: left; height: 100px">
-        <div
-          style="
-            width: 198px;
-            float: left;
-            height: 100%;
-            border: 1px black solid;
-          "
-          id="left"
-        ></div>
-        <div style="width: 398px; float: left; height: 100%">
+    <div
+      class="container"
+      style="
+        position: relative;
+        width: 600px;
+        float: left;
+        left: 50%;
+        margin-left: -300px;
+      "
+    >
+      <div
+        style="position: relative; width: 600px; display: none; float: left"
+        id="game"
+      >
+        <div style="width: 100%; float: left; border: 5px solid black">
+          <canvas id="canvas" width="600" height="600"></canvas>
+        </div>
+        <div style="width: 600px; float: left; height: 100px; display: none">
           <div
             style="
-              width: 100%;
+              width: 198px;
               float: left;
-              height: 50px;
+              height: 100%;
               border: 1px black solid;
             "
-            id="down"
+            id="left"
           ></div>
+          <div style="width: 398px; float: left; height: 100%">
+            <div
+              style="
+                width: 100%;
+                float: left;
+                height: 50px;
+                border: 1px black solid;
+              "
+              id="down"
+            ></div>
+            <div
+              style="
+                width: 100%;
+                float: left;
+                height: 50px;
+                border: 1px black solid;
+              "
+              id="up"
+            ></div>
+          </div>
           <div
             style="
-              width: 100%;
+              width: 198px;
               float: left;
-              height: 50px;
+              height: 100%;
               border: 1px black solid;
             "
-            id="up"
+            id="right"
           ></div>
         </div>
-        <div
-          style="
-            width: 198px;
-            float: left;
-            height: 100%;
-            border: 1px black solid;
-          "
-          id="right"
-        ></div>
       </div>
-    </div>
-    <div style="position: relative; width: 100%" id="start">
-      <p id="room-id" style="display: none"></p>
-      <p id="create-room" onClick="window['createRoom']()">
-        <button>Create Room</button>
-      </p>
-      <p id="join-room">
-        <button onClick="window['joinRoom']()">Join Room</button>
-      </p>
-      <p id="start-game" style="display: none" onClick="window['startGame']()">
-        <button>Start Game</button>
-      </p>
-      <p id="join-room-section" style="display: none">
-        <input type="text" name="id" /><button onClick="window['submit']()">
-          Submit
-        </button>
-      </p>
+      <div style="position: relative; width: 600px; float: left" id="start">
+        <p id="room-id" style="display: none"></p>
+        <p id="create-room" onClick="window['createRoom']()">
+          <button>Create Room</button>
+        </p>
+        <p id="join-room">
+          <button onClick="window['joinRoom']()">Join Room</button>
+        </p>
+        <p
+          id="start-game"
+          style="display: none"
+          onClick="window['startGame']()"
+        >
+          <button>Start Game</button>
+        </p>
+        <p id="join-room-section" style="display: none">
+          <input type="text" name="id" /><button onClick="window['submit']()">
+            Submit
+          </button>
+        </p>
+      </div>
     </div>
   </body>
 </html>
