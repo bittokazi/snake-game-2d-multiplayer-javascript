@@ -10,18 +10,23 @@
       class="container"
       style="
         position: relative;
-        width: 600px;
+        width: 750px;
         float: left;
         left: 50%;
         margin-left: -300px;
       "
     >
       <div
-        style="position: relative; width: 600px; display: none; float: left"
+        style="position: relative; width: 750px; display: none; float: left"
         id="game"
       >
-        <div style="width: 100%; float: left; border: 5px solid black">
+        <div style="width: 600px; float: left; border: 5px solid black">
           <canvas id="canvas" width="600" height="600"></canvas>
+        </div>
+        <div style="width: 130px; float: left; margin-left: 10px">
+          <table>
+            <tbody id="scoreboard"></tbody>
+          </table>
         </div>
         <div style="width: 600px; float: left; height: 100px; display: none">
           <div

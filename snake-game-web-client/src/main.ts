@@ -4,11 +4,12 @@ import "./style.css";
 import { Config } from "./config";
 
 let gameEngine: GameEngine;
-let room = {};
+let room: any = {};
 let w: any = window;
 
 function gameStart(data: any) {
   console.log("game start", data);
+  room = data;
   document.getElementById("game").style.display = "block";
   gameEngine = new GameEngine().initialize(
     "#a5d8ff",
@@ -31,11 +32,25 @@ function gameStart(data: any) {
       );
     }
   );
+  showScoreBoard();
 }
 
 function eaten(data: any) {
   gameEngine.eaten(data);
   gameEngine.setFood(data);
+  showScoreBoard(data.winner);
+}
+
+function showScoreBoard(winner: any = null) {
+  let scoreboard = "";
+  room.players = room.players.map((player: any) => {
+    if (winner && player.id == winner) {
+      player.score++;
+    }
+    scoreboard += generateScoreCard(player.fillColor, player.score);
+    return player;
+  });
+  document.getElementById("scoreboard").innerHTML = scoreboard;
 }
 
 let uuid = Math.random().toString(36).substring(7);
@@ -122,3 +137,23 @@ w["submit"] = () => {
     }
   );
 };
+
+function generateScoreCard(color: String, score: number): String {
+  return `
+    <tr>
+      <td style="font-size: 25px">
+        <span
+          style="
+            height: 35px;
+            width: 35px;
+            background-color: ${color};
+            border-radius: 50%;
+            display: inline-block;
+            border: 1px solid black;
+          "
+        ></span>
+        <span style="font-size: 44px"> ${score} </span>
+      </td>
+    </tr>
+  `;
+}
