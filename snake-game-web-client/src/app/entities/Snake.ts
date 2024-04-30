@@ -1,36 +1,34 @@
-export class Snake {
-  constructor(
-    gridX,
-    gridY,
-    size,
-    direction,
-    gridSystem,
-    food,
-    fillColor,
-    sendEat,
-    end,
-    lostListner
-  ) {
-    this.gridX = gridX;
-    this.gridY = gridY;
-    this.size = size;
-    this.body = [];
-    this.direction = direction;
-    this.gridSystem = gridSystem;
-    this.directionQueue = [];
-    this.SPEED = 5;
-    this.updateTime = 0;
-    this.food = food;
-    this.updateLock = false;
-    this.fillColor = fillColor;
-    this.sendEat = sendEat;
-    this.dead = false;
-    this.end = end;
-    this.lostListner = lostListner;
-    return this;
-  }
+import { GridSystem } from "../engine/GridSystem";
+import { Food } from "./Food";
+import { SnakeBody } from "../models/SnakeBody";
+import { SnakeDirection } from "../models/SnakeDirection";
+import { SnakeMovement } from "../models/SnakeMovement";
 
-  init() {
+export class Snake {
+  private static SPEED = 5;
+  public body: SnakeBody[] = [];
+  public directionQueue: SnakeMovement[] = [];
+
+  private updateTime: number = 0;
+  private updateLock: boolean = false;
+  private dead: boolean = false;
+  private eatingLock: boolean = false;
+  private newBodyPart: SnakeBody[] = [];
+
+  constructor(
+    public gridX: number,
+    public gridY: number,
+    private size: number,
+    private direction: SnakeDirection,
+    private gridSystem: GridSystem,
+    private food: Food,
+    private fillColor: string,
+    private sendEat: (data: any) => void,
+    private end: boolean,
+    private lostListner: () => void
+  ) {}
+
+  init(): Snake {
     for (let i = 0; i < this.size; i++) {
       let grid = this.gridSystem.grids[this.gridX][this.gridY];
       grid.fillColor = this.fillColor;
@@ -40,42 +38,42 @@ export class Snake {
         y: this.gridY,
         direction: this.direction,
       });
-      if (this.direction == "right") {
+      if (this.direction == SnakeDirection.RIGHT) {
         this.gridY++;
-      } else if (this.direction == "left") {
+      } else if (this.direction == SnakeDirection.LEFT) {
         this.gridY--;
-      } else if (this.direction == "up") {
+      } else if (this.direction == SnakeDirection.UP) {
         this.gridX--;
-      } else if (this.direction == "down") {
+      } else if (this.direction == SnakeDirection.DOWN) {
         this.gridX++;
       }
     }
     return this;
   }
 
-  move(direction) {
-    if (!this.updateLock) {
+  move(direction: SnakeDirection) {
+    if (!this.updateLock && !this.eatingLock) {
       if (
-        this.body[this.body.length - 1].direction == "up" &&
-        direction == "down"
+        this.body[this.body.length - 1].direction == SnakeDirection.UP &&
+        direction == SnakeDirection.DOWN
       ) {
         return;
       }
       if (
-        this.body[this.body.length - 1].direction == "down" &&
-        direction == "up"
+        this.body[this.body.length - 1].direction == SnakeDirection.DOWN &&
+        direction == SnakeDirection.UP
       ) {
         return;
       }
       if (
-        this.body[this.body.length - 1].direction == "right" &&
-        direction == "left"
+        this.body[this.body.length - 1].direction == SnakeDirection.RIGHT &&
+        direction == SnakeDirection.LEFT
       ) {
         return;
       }
       if (
-        this.body[this.body.length - 1].direction == "left" &&
-        direction == "right"
+        this.body[this.body.length - 1].direction == SnakeDirection.LEFT &&
+        direction == SnakeDirection.RIGHT
       ) {
         return;
       }
@@ -88,13 +86,26 @@ export class Snake {
   }
 
   update() {
-    if (this.updateTime > 1000 / this.SPEED) {
+    if (this.updateTime > 1000 / Snake.SPEED) {
       if (!this.dead && !this.end) {
         if (this.directionQueue.length > 0) {
           this.updateLock = true;
+          if (this.newBodyPart.length > 0) {
+            for (let k = 0; k < this.newBodyPart.length; k++) {
+              this.body = [
+                {
+                  ...this.newBodyPart[k],
+                },
+              ].concat(this.body);
+              console.log(this.body);
+
+              this.newBodyPart.splice(k, 1);
+              k--;
+            }
+          }
           for (let i = 0; i < this.directionQueue.length; i++) {
             let found = false;
-            for (let j = 0; j < this.body.length; j++) {
+            for (let j = this.body.length - 1; j >= 0; j--) {
               if (
                 this.directionQueue[i].x == this.body[j].x &&
                 this.directionQueue[i].y == this.body[j].y
@@ -103,6 +114,7 @@ export class Snake {
                 this.body[j].direction = this.directionQueue[i].direction;
               }
             }
+
             if (!found) {
               this.directionQueue.splice(i, 1);
               i--;
@@ -111,15 +123,15 @@ export class Snake {
           this.updateLock = false;
         }
 
-        for (let i = 0; i < this.body.length; i++) {
-          if (this.body[i].direction == "right") {
+        for (let i = this.body.length - 1; i >= 0; i--) {
+          if (this.body[i].direction == SnakeDirection.RIGHT) {
             this.body[i].y++;
-          } else if (this.body[i].direction == "left") {
+          } else if (this.body[i].direction == SnakeDirection.LEFT) {
             this.body[i].y--;
-          } else if (this.body[i].direction == "up") {
-            this.body[i].x++;
-          } else if (this.body[i].direction == "down") {
+          } else if (this.body[i].direction == SnakeDirection.UP) {
             this.body[i].x--;
+          } else if (this.body[i].direction == SnakeDirection.DOWN) {
+            this.body[i].x++;
           }
         }
         // wall collision check
@@ -155,25 +167,25 @@ export class Snake {
     // for (let i = 0; i < this.body.length; i++) {
     let collision = false;
     if (
-      this.body[this.body.length - 1].direction == "right" &&
+      this.body[this.body.length - 1].direction == SnakeDirection.RIGHT &&
       this.food.x == this.body[this.body.length - 1].x &&
       this.food.y == this.body[this.body.length - 1].y
     ) {
       collision = true;
     } else if (
-      this.body[this.body.length - 1].direction == "left" &&
+      this.body[this.body.length - 1].direction == SnakeDirection.LEFT &&
       this.food.x == this.body[this.body.length - 1].x &&
       this.food.y == this.body[this.body.length - 1].y
     ) {
       collision = true;
     } else if (
-      this.body[this.body.length - 1].direction == "up" &&
+      this.body[this.body.length - 1].direction == SnakeDirection.UP &&
       this.food.x == this.body[this.body.length - 1].x &&
       this.food.y == this.body[this.body.length - 1].y
     ) {
       collision = true;
     } else if (
-      this.body[this.body.length - 1].direction == "down" &&
+      this.body[this.body.length - 1].direction == SnakeDirection.DOWN &&
       this.food.x == this.body[this.body.length - 1].x &&
       this.food.y == this.body[this.body.length - 1].y
     ) {
@@ -198,34 +210,37 @@ export class Snake {
   }
 
   eaten() {
+    this.eatingLock = true;
     let p;
-    if (this.body[0].direction == "right") {
+    let x = this.body[0].x;
+    let y = this.body[0].y;
+    let direction = this.body[0].direction;
+    if (direction == SnakeDirection.RIGHT) {
       p = {
-        x: this.body[0].x,
-        y: this.body[0].y - 1,
+        x,
+        y: y - 1,
       };
-    } else if (this.body[0].direction == "left") {
+    } else if (direction == SnakeDirection.LEFT) {
       p = {
-        x: this.body[0].x,
-        y: this.body[0].y + 1,
+        x,
+        y: y + 1,
       };
-    } else if (this.body[0].direction == "up") {
+    } else if (direction == SnakeDirection.UP) {
       p = {
-        x: this.body[0].x - 1,
-        y: this.body[0].y,
+        x: x + 1,
+        y,
       };
-    } else if (this.body[0].direction == "down") {
+    } else if (direction == SnakeDirection.DOWN) {
       p = {
-        x: this.body[0].x + 1,
-        y: this.body[0].y,
+        x: x - 1,
+        y,
       };
     }
-    this.body = [
-      {
-        ...p,
-        direction: this.body[0].direction,
-      },
-    ].concat(this.body);
+    this.newBodyPart.push({
+      ...p,
+      direction: direction,
+    });
+    this.eatingLock = false;
   }
 
   endGame() {

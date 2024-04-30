@@ -1,4 +1,4 @@
-import { GameEngine } from "./engine/GameEngine";
+import { GameEngine } from "./app/engine/GameEngine";
 import { io } from "socket.io-client";
 import "./style.css";
 import { Config } from "./config";
@@ -11,17 +11,10 @@ function gameStart(data: any) {
   console.log("✈️ Game start log ➡️", data);
   room = data;
   document.getElementById("game").style.display = "block";
-  gameEngine = new GameEngine().initialize(
-    "#a5d8ff",
+  gameEngine = new GameEngine(
     uuid,
-    data,
-    (player: any) => {
-      socket.emit("game.request.position.update", {
-        room,
-        id: uuid,
-        ...player,
-      });
-    },
+    room,
+    "#a5d8ff",
     (body: any) => {
       socket.emit(
         "game.request.food.eat",
@@ -30,8 +23,15 @@ function gameStart(data: any) {
           eaten(data);
         }
       );
+    },
+    (player: any) => {
+      socket.emit("game.request.position.update", {
+        room,
+        id: uuid,
+        ...player,
+      });
     }
-  );
+  ).initialize();
   showScoreBoard();
 }
 

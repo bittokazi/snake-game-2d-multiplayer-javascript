@@ -1,21 +1,21 @@
-import { Grid } from "./Grid";
+import { Grid } from "../entities/Grid";
 
 export class GridSystem {
-  constructor(canvas, context, gridWidth, gridHeight) {
-    this.canvas = canvas;
-    this.context = context;
-    this.gridWidth = gridWidth;
-    this.gridHeight = gridHeight;
-    this.grids = [];
-    return this;
-  }
+  public grids: Grid[][] = [];
 
-  testGrid() {
+  constructor(
+    private canvas: HTMLCanvasElement,
+    private context: CanvasRenderingContext2D,
+    private gridWidth: number,
+    private gridHeight: number
+  ) {}
+
+  testGrid(): GridSystem {
     this.generateGrid(true);
     return this;
   }
 
-  generateGrid(test) {
+  generateGrid(test: Boolean): GridSystem {
     let startY = 0;
     for (let i = 0; i < this.canvas.width / this.gridWidth; i++) {
       let startX = 0;
