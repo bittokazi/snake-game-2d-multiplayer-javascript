@@ -23,24 +23,51 @@ export class EventHandler {
         this.rooms[data.id].players = [];
         this.rooms[data.id].players.push({
           id: data.id,
+          name: data.name,
         });
-        socket.to(data.id).emit("game.room.player.join", { id: data.id });
-        callback(data);
+        socket.to(data.id).emit("game.room.player.join", this.rooms[data.id]);
+        callback(this.rooms[data.id]);
       });
 
       socket.on("game.request.room.join", (data, callback) => {
         if (this.rooms[data.room.id]) {
+          if (this.rooms[data.room.id].players.length > 3) {
+            return;
+          }
           if (!this.rooms[data.room.id].players) {
             this.rooms[data.room.id].players = [];
           }
           this.rooms[data.room.id].players.push({
             id: data.id,
+            name: data.name,
           });
           socket.join(data.room.id);
           socket
             .to(data.room.id)
-            .emit("game.room.player.join", { id: data.id });
+            .emit("game.room.player.join", this.rooms[data.room.id]);
+          callback(this.rooms[data.room.id]);
+        }
+      });
+
+      socket.on("game.request.room.kick", (data, callback) => {
+        if (this.rooms[data.room.id]) {
+          let index = null;
+          this.rooms[data.room.id].players.map((player: any, i: Number) => {
+            if (player.id == data.id) {
+              index = i;
+            }
+          });
+          this.rooms[data.room.id].players.splice(index, 1);
+          socket.nsp
+            .to(data.room.id)
+            .emit("game.room.player.kick", this.rooms[data.room.id]);
           callback(data);
+        }
+      });
+
+      socket.on("game.request.room.leave", (data, callback) => {
+        if (this.rooms[data.room.id]) {
+          socket.leave(data.room.id);
         }
       });
 
