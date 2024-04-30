@@ -88,8 +88,7 @@ export class Snake {
   update() {
     if (this.updateTime > 1000 / Snake.SPEED) {
       if (!this.dead && !this.end) {
-        if (this.directionQueue.length > 0) {
-          this.updateLock = true;
+        let addNewBody = () => {
           if (this.newBodyPart.length > 0) {
             for (let k = 0; k < this.newBodyPart.length; k++) {
               this.body = [
@@ -103,6 +102,10 @@ export class Snake {
               k--;
             }
           }
+        };
+        if (this.directionQueue.length > 0) {
+          this.updateLock = true;
+          addNewBody();
           for (let i = 0; i < this.directionQueue.length; i++) {
             let found = false;
             for (let j = this.body.length - 1; j >= 0; j--) {
@@ -120,6 +123,10 @@ export class Snake {
               i--;
             }
           }
+          this.updateLock = false;
+        } else {
+          this.updateLock = true;
+          addNewBody();
           this.updateLock = false;
         }
 
