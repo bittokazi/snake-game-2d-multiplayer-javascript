@@ -6,8 +6,6 @@ export class InputController {
   init(): InputController {
     let callback = this.callback;
     document.onkeydown = function (e: KeyboardEvent) {
-      console.log(e);
-
       // e = e || window.event;
       if (e.key == "ArrowDown") {
         callback("down" as SnakeDirection);

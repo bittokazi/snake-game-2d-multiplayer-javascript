@@ -114,7 +114,7 @@ export class EventHandler {
       });
 
       socket.on("disconnect", () => {
-        console.log("user disconnected");
+        console.log("🗙 user disconnected");
       });
     });
   }

@@ -96,8 +96,6 @@ export class Snake {
                   ...this.newBodyPart[k],
                 },
               ].concat(this.body);
-              console.log(this.body);
-
               this.newBodyPart.splice(k, 1);
               k--;
             }
