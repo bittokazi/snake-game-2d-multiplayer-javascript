@@ -2,6 +2,7 @@ import { GameEngine } from "./app/engine/GameEngine";
 import { io } from "socket.io-client";
 import "./style.css";
 import { Config } from "./config";
+import Swal from "sweetalert2";
 
 let gameEngine: GameEngine;
 let room: any = {};
@@ -10,6 +11,9 @@ let w: any = window;
 function gameStart(data: any) {
   console.log("✈️ Game start log ➡️", data);
   room = data;
+  if (room.players.filter((player: any) => player.id == uuid).length < 1) {
+    return;
+  }
   document.getElementById("game").style.display = "block";
   gameEngine = new GameEngine(
     uuid,
@@ -47,7 +51,11 @@ function showScoreBoard(winner: any = null) {
     if (winner && player.id == winner) {
       player.score++;
     }
-    scoreboard += generateScoreCard(player.fillColor, player.score);
+    scoreboard += generateScoreCard(
+      player.name,
+      player.fillColor,
+      player.score
+    );
     return player;
   });
   document.getElementById("scoreboard").innerHTML = scoreboard;
@@ -65,6 +73,7 @@ socket.on("connect", () => {
 
   socket.on("game.room.player.join", (data) => {
     console.log("👤 Player joined", data);
+    generatePlayerList(data.players);
   });
 
   socket.on("game.room.game.position.update", (data) => {
@@ -83,6 +92,75 @@ socket.on("connect", () => {
     console.log("🔚 game.room.game.end", data);
     gameEngine.endGame();
   });
+
+  socket.on("game.room.player.kick", (data) => {
+    console.log("✅ Got kicked");
+    room = data;
+    generatePlayerList(data.players);
+
+    if (room.players.filter((player: any) => player.id == uuid).length < 1) {
+      socket.emit(
+        "game.request.room.leave",
+        { id: uuid, room: room },
+        (data: any) => {}
+      );
+      Swal.fire({
+        title: "You have been kicked.",
+        confirmButtonText: "Go back",
+        showClass: {
+          popup: `
+            animate__animated
+            animate__fadeInUp
+            animate__faster
+          `,
+        },
+        hideClass: {
+          popup: `
+            animate__animated
+            animate__fadeOutDown
+            animate__faster
+          `,
+        },
+      }).then((result) => {
+        if (result.isConfirmed) {
+          document.getElementById("game").style.display = "none";
+          document.getElementById("room-id").style.display = "none";
+          document.getElementById("create-room").style.display = "block";
+          document.getElementById("join-room").style.display = "block";
+          document.getElementById("start-game").style.display = "none";
+        }
+      });
+    }
+  });
+
+  socket.on("disconnect", () => {
+    Swal.fire({
+      title: "Disconnected",
+      confirmButtonText: "Go back",
+      showClass: {
+        popup: `
+          animate__animated
+          animate__fadeInUp
+          animate__faster
+        `,
+      },
+      hideClass: {
+        popup: `
+          animate__animated
+          animate__fadeOutDown
+          animate__faster
+        `,
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        document.getElementById("game").style.display = "none";
+        document.getElementById("room-id").style.display = "none";
+        document.getElementById("create-room").style.display = "block";
+        document.getElementById("join-room").style.display = "block";
+        document.getElementById("start-game").style.display = "none";
+      }
+    });
+  });
 });
 
 w["startGame"] = () => {
@@ -99,9 +177,10 @@ w["startGame"] = () => {
 
 w["createRoom"] = () => {
   console.log("📨 Create room request sent");
+  let name = (document.getElementsByName("name")[0] as HTMLInputElement).value;
   socket.emit(
     "game.request.room.create",
-    { id: uuid, target: 10 },
+    { id: uuid, target: 10, name: name },
     (data: any) => {
       console.log("📊 Created room log ➡️ ", data);
       document.getElementById("room-id").innerHTML = uuid;
@@ -112,6 +191,7 @@ w["createRoom"] = () => {
       room = {
         id: uuid,
       };
+      generatePlayerList(data.players);
       console.log("✅ Room created successfully");
     }
   );
@@ -125,38 +205,66 @@ w["joinRoom"] = () => {
 
 w["submit"] = () => {
   let id = (document.getElementsByName("id")[0] as HTMLInputElement).value;
+  let name = (document.getElementsByName("name")[1] as HTMLInputElement).value;
   socket.emit(
     "game.request.room.join",
-    { id: uuid, room: { id } },
+    { id: uuid, room: { id }, name: name },
     (data: any) => {
       console.log("join room", data);
-      document.getElementById("room-id").innerHTML = data.room.id;
+      document.getElementById("room-id").innerHTML = data.id;
 
       document.getElementById("room-id").style.display = "block";
       document.getElementById("join-room-section").style.display = "none";
       room = {
-        id,
+        id: data.id,
       };
+      generatePlayerList(data.players);
     }
   );
 };
 
-function generateScoreCard(color: String, score: number): String {
+w["kick"] = (id: number) => {
+  socket.emit("game.request.room.kick", { room, id: id }, (data: any) => {});
+};
+
+function generateScoreCard(name: String, color: String, score: number): String {
   return `
     <tr>
       <td style="font-size: 25px">
         <span
           style="
-            height: 35px;
-            width: 35px;
+            height: 15px;
+            width: 15px;
             background-color: ${color};
             border-radius: 50%;
             display: inline-block;
             border: 1px solid black;
           "
-        ></span>
-        <span style="font-size: 44px"> ${score} </span>
+        ></span> 
+        <span style="font-size: 22px"> ${name} (${score}) </span>
       </td>
     </tr>
   `;
+}
+
+function generatePlayerList(players: any[]) {
+  let plyersTable = "";
+
+  players.map((player) => {
+    plyersTable += `
+      <tr>
+        <td style="font-size: 15px">
+           ${player.name}
+        </td>
+        <td style="font-size: 15px">
+           ${
+             player.id != uuid && uuid == room.id
+               ? `<button onclick="kick('${player.id}')">Kick</button>`
+               : ""
+           }
+        </td>
+      </tr>
+    `;
+  });
+  document.getElementById("players").innerHTML = plyersTable;
 }

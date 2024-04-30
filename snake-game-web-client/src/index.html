@@ -22,12 +22,24 @@
         style="position: relative; width: 750px; display: none; float: left"
         id="game"
       >
-        <div style="width: 600px; float: left; border: 5px solid black">
+        <div
+          style="
+            width: 600px;
+            float: left;
+            border: 5px solid black;
+            height: 600px;
+          "
+        >
           <canvas id="canvas" width="600" height="600"></canvas>
         </div>
         <div style="width: 130px; float: left; margin-left: 10px">
           <table>
             <tbody id="scoreboard"></tbody>
+          </table>
+        </div>
+        <div style="width: 600px; float: left; margin-left: 10px">
+          <table>
+            <tbody id="players"></tbody>
           </table>
         </div>
         <div style="width: 600px; float: left; height: 100px; display: none">
@@ -73,8 +85,10 @@
       </div>
       <div style="position: relative; width: 600px; float: left" id="start">
         <p id="room-id" style="display: none"></p>
-        <p id="create-room" onClick="window['createRoom']()">
-          <button>Create Room</button>
+
+        <p id="create-room">
+          <input type="text" name="name" placeholder="name" />
+          <button onClick="window['createRoom']()">Create Room</button>
         </p>
         <p id="join-room">
           <button onClick="window['joinRoom']()">Join Room</button>
@@ -87,6 +101,7 @@
           <button>Start Game</button>
         </p>
         <p id="join-room-section" style="display: none">
+          <input type="text" name="name" placeholder="name" />
           <input type="text" name="id" /><button onClick="window['submit']()">
             Submit
           </button>
