@@ -7,7 +7,7 @@ import { Timer } from "./Timer";
 import { GridSystem } from "./GridSystem";
 
 export class GameEngine {
-  static GAME_START_TIME: number = 1;
+  static GAME_START_TIME: number = 5;
 
   private canvas: HTMLCanvasElement;
   private context: CanvasRenderingContext2D;
@@ -22,6 +22,8 @@ export class GameEngine {
   private winText: TextObject;
   private startText: TextObject;
   private startTimer: Timer;
+  private isExit: boolean = false;
+  private gameEngineInstanceId = Math.random().toString(36).substring(7);
 
   constructor(
     private uuid: string,
@@ -141,6 +143,9 @@ export class GameEngine {
       (1000 / 60) * (60 / FRAMES_PER_SECOND) - (1000 / 60) * 0.5;
     let lastFrameTime = 0;
     let canvas = (time: any) => {
+      console.log("requesting frame from [" + this.gameEngineInstanceId + "]");
+
+      if (this.isExit) return;
       if (time - lastFrameTime < FRAME_MIN_TIME) {
         requestAnimationFrame(canvas);
         return;
@@ -203,11 +208,20 @@ export class GameEngine {
     this.lost = true;
   };
 
-  endGame() {
+  endGame(data: any) {
     this.end = true;
 
+    if (this.uuid == data.winner) {
+      this.lost = false;
+    } else {
+      this.lost = true;
+    }
     for (let player of this.snakes.values()) {
       player.endGame();
     }
+  }
+
+  exit() {
+    this.isExit = true;
   }
 }
