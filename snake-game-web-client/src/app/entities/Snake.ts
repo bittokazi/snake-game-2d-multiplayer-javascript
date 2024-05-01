@@ -151,6 +151,18 @@ export class Snake {
           this.dead = true;
           if (this.lostListner) this.lostListner();
         }
+        // own body collision
+        for (let i = 0; i < this.body.length; i++) {
+          for (let j = i + 1; j < this.body.length; j++) {
+            if (
+              this.body[i].x == this.body[j].x &&
+              this.body[i].y == this.body[j].y
+            ) {
+              this.dead = true;
+              if (this.lostListner) this.lostListner();
+            }
+          }
+        }
       }
 
       this.updateTime = 0;
