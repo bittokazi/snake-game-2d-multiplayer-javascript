@@ -3,6 +3,7 @@ import { io } from "socket.io-client";
 import "./style.css";
 import { Config } from "./config";
 import Swal from "sweetalert2";
+import { Storage } from "./app/engine/Storage";
 
 let gameEngine: GameEngine;
 let room: any = {};
@@ -15,6 +16,9 @@ function gameStart(data: any) {
     return;
   }
   document.getElementById("game").style.display = "block";
+  if (gameEngine) {
+    gameEngine.exit();
+  }
   gameEngine = new GameEngine(
     uuid,
     room,
@@ -61,7 +65,14 @@ function showScoreBoard(winner: any = null) {
   document.getElementById("scoreboard").innerHTML = scoreboard;
 }
 
-let uuid = Math.random().toString(36).substring(7);
+let uuid = "";
+if (Storage.getInstanceId() == "") {
+  uuid = Math.random().toString(36).substring(7);
+  Storage.setInstanceId(uuid);
+} else {
+  uuid = Storage.getInstanceId();
+}
+
 let socket = io(Config.API_BASE_URL);
 socket.on("connect", () => {
   console.log("🔗 Socket Connected");
@@ -90,7 +101,7 @@ socket.on("connect", () => {
 
   socket.on("game.room.game.end", (data) => {
     console.log("🔚 game.room.game.end", data);
-    gameEngine.endGame();
+    gameEngine.endGame(data);
   });
 
   socket.on("game.room.player.kick", (data) => {
