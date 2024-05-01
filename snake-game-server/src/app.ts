@@ -31,7 +31,7 @@ export class EventHandler {
 
       socket.on("game.request.room.join", (data, callback) => {
         if (this.rooms[data.room.id]) {
-          if (this.rooms[data.room.id].players.length > 3) {
+          if (this.rooms[data.room.id].players.length >= 4) {
             return;
           }
           if (!this.rooms[data.room.id].players) {
