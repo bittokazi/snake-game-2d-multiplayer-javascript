@@ -82,6 +82,9 @@ socket.on("connect", () => {
   runOnElements("notconnected", (element) => {
     (element as HTMLElement).style.display = "none";
   });
+  runOnElements("start-section", (element) => {
+    (element as HTMLElement).style.display = "block";
+  });
 
   socket.on("game.room.game.start", (data) => {
     console.log("game.room.game.start");
@@ -220,11 +223,16 @@ socket.on("connect", () => {
   });
 
   socket.on("disconnect", () => {
+    kickAction();
     runOnElements("connected", (element) => {
       (element as HTMLElement).style.display = "none";
     });
     runOnElements("notconnected", (element) => {
       (element as HTMLElement).style.display = "block";
+    });
+
+    runOnElements("start-section", (element) => {
+      (element as HTMLElement).setAttribute("style", "display:none !important");
     });
     Swal.fire({
       title: "Disconnected",
@@ -244,11 +252,12 @@ socket.on("connect", () => {
           animate__faster
         `,
       },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        kickAction();
-      }
     });
+    // .then((result) => {
+    //   if (result.isConfirmed) {
+    //     kickAction();
+    //   }
+    // });
   });
 });
 
