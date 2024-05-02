@@ -13,7 +13,7 @@ console.log("🮱  Express and HTTP initiated...");
 
 const io = new socketIo.Server(httpServer, {
   cors: {
-    origin: "http://192.168.10.100:8080",
+    origin: "http://0.0.0.0:8080",
     methods: ["GET", "POST"],
   },
 });

@@ -57,17 +57,31 @@ export class EventHandler {
               index = i;
             }
           });
-          this.rooms[data.room.id].players.splice(index, 1);
-          socket.nsp
-            .to(data.room.id)
-            .emit("game.room.player.kick", this.rooms[data.room.id]);
-          callback(data);
+          if (index != null) {
+            this.rooms[data.room.id].players.splice(index, 1);
+            socket.nsp
+              .to(data.room.id)
+              .emit("game.room.player.kick", this.rooms[data.room.id]);
+            callback(this.rooms[data.room.id]);
+          }
         }
       });
 
       socket.on("game.request.room.leave", (data, callback) => {
         if (this.rooms[data.room.id]) {
           socket.leave(data.room.id);
+          let index = null;
+          this.rooms[data.room.id].players.map((player: any, i: Number) => {
+            if (player.id == data.id) {
+              index = i;
+            }
+          });
+          if (index != null) {
+            this.rooms[data.room.id].players.splice(index, 1);
+            socket
+              .to(data.room.id)
+              .emit("game.room.player.left", this.rooms[data.room.id]);
+          }
         }
       });
 

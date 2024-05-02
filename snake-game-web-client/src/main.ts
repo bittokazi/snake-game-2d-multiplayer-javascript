@@ -4,6 +4,7 @@ import "./style.css";
 import { Config } from "./config";
 import Swal from "sweetalert2";
 import { Storage } from "./app/engine/Storage";
+import "./assets/css/style.css";
 
 let gameEngine: GameEngine;
 let room: any = {};
@@ -15,7 +16,6 @@ function gameStart(data: any) {
   if (room.players.filter((player: any) => player.id == uuid).length < 1) {
     return;
   }
-  document.getElementById("game").style.display = "block";
   if (gameEngine) {
     gameEngine.exit();
   }
@@ -76,14 +76,84 @@ if (Storage.getInstanceId() == "") {
 let socket = io(Config.API_BASE_URL);
 socket.on("connect", () => {
   console.log("🔗 Socket Connected");
+  runOnElements("connected", (element) => {
+    (element as HTMLElement).style.display = "block";
+  });
+  runOnElements("notconnected", (element) => {
+    (element as HTMLElement).style.display = "none";
+  });
 
   socket.on("game.room.game.start", (data) => {
     console.log("game.room.game.start");
+    if (data.players.filter((player: any) => player.id == uuid).length < 1) {
+      socket.emit(
+        "game.request.room.leave",
+        { id: uuid, room: room },
+        (data: any) => {}
+      );
+      Swal.fire({
+        title: "You have been kicked.",
+        confirmButtonText: "Go back",
+        showClass: {
+          popup: `
+            animate__animated
+            animate__fadeInUp
+            animate__faster
+          `,
+        },
+        hideClass: {
+          popup: `
+            animate__animated
+            animate__fadeOutDown
+            animate__faster
+          `,
+        },
+      });
+      kickAction();
+      return;
+    }
+    runOnElements("game", (element) => {
+      (element as HTMLElement).style.display = "block";
+    });
+    runOnElements("game-admin-cntrl", (element) => {
+      (element as HTMLElement).style.display = "none";
+    });
+    runOnElements("start-section", (element) => {
+      (element as HTMLElement).setAttribute("style", "display:none !important");
+    });
     gameStart(data);
   });
 
   socket.on("game.room.player.join", (data) => {
     console.log("👤 Player joined", data);
+    if (data.players.filter((player: any) => player.id == uuid).length < 1) {
+      socket.emit(
+        "game.request.room.leave",
+        { id: uuid, room: room },
+        (data: any) => {}
+      );
+      Swal.fire({
+        title: "You have been kicked.",
+        confirmButtonText: "Go back",
+        showClass: {
+          popup: `
+            animate__animated
+            animate__fadeInUp
+            animate__faster
+          `,
+        },
+        hideClass: {
+          popup: `
+            animate__animated
+            animate__fadeOutDown
+            animate__faster
+          `,
+        },
+      });
+      kickAction();
+      console.log("👤 User not part of the room", data);
+      return;
+    }
     generatePlayerList(data.players);
   });
 
@@ -104,8 +174,8 @@ socket.on("connect", () => {
     gameEngine.endGame(data);
   });
 
-  socket.on("game.room.player.kick", (data) => {
-    console.log("✅ Got kicked");
+  socket.on("game.room.player.kick", (data: any) => {
+    console.log("✅ Got kicked", data.players);
     room = data;
     generatePlayerList(data.players);
 
@@ -134,17 +204,25 @@ socket.on("connect", () => {
         },
       }).then((result) => {
         if (result.isConfirmed) {
-          document.getElementById("game").style.display = "none";
-          document.getElementById("room-id").style.display = "none";
-          document.getElementById("create-room").style.display = "block";
-          document.getElementById("join-room").style.display = "block";
-          document.getElementById("start-game").style.display = "none";
+          kickAction();
         }
       });
     }
   });
 
+  socket.on("game.room.player.left", (data) => {
+    console.log("✅ Player left room");
+    room = data;
+    generatePlayerList(data.players);
+  });
+
   socket.on("disconnect", () => {
+    runOnElements("connected", (element) => {
+      (element as HTMLElement).style.display = "none";
+    });
+    runOnElements("notconnected", (element) => {
+      (element as HTMLElement).style.display = "block";
+    });
     Swal.fire({
       title: "Disconnected",
       confirmButtonText: "Go back",
@@ -164,11 +242,7 @@ socket.on("connect", () => {
       },
     }).then((result) => {
       if (result.isConfirmed) {
-        document.getElementById("game").style.display = "none";
-        document.getElementById("room-id").style.display = "none";
-        document.getElementById("create-room").style.display = "block";
-        document.getElementById("join-room").style.display = "block";
-        document.getElementById("start-game").style.display = "none";
+        kickAction();
       }
     });
   });
@@ -180,6 +254,18 @@ w["startGame"] = () => {
     "game.request.game.start",
     { room: { id: uuid } },
     (data: any) => {
+      runOnElements("game", (element) => {
+        (element as HTMLElement).style.display = "block";
+      });
+      runOnElements("start-section", (element) => {
+        (element as HTMLElement).setAttribute(
+          "style",
+          "display:none !important"
+        );
+      });
+      runOnElements("go-back", (element) => {
+        (element as HTMLElement).style.display = "block";
+      });
       gameStart(data);
       console.log("⚡ Game start request successfull");
     }
@@ -194,14 +280,25 @@ w["createRoom"] = () => {
     { id: uuid, target: 10, name: name },
     (data: any) => {
       console.log("📊 Created room log ➡️ ", data);
-      document.getElementById("room-id").innerHTML = uuid;
-      document.getElementById("room-id").style.display = "block";
-      document.getElementById("create-room").style.display = "none";
-      document.getElementById("join-room").style.display = "none";
-      document.getElementById("start-game").style.display = "block";
-      room = {
-        id: uuid,
-      };
+      runOnElements("room-id-holder", (element) => {
+        element.innerHTML = data.id;
+      });
+      document.getElementById("players-list-main").style.display =
+        "inline-table";
+
+      runOnElements("create-room", (element) => {
+        (element as HTMLElement).style.display = "none";
+      });
+      runOnElements("join-room", (element) => {
+        (element as HTMLElement).style.display = "none";
+      });
+      runOnElements("start-game", (element) => {
+        (element as HTMLElement).style.display = "block";
+      });
+      runOnElements("go-back", (element) => {
+        (element as HTMLElement).style.display = "block";
+      });
+      room = data;
       generatePlayerList(data.players);
       console.log("✅ Room created successfully");
     }
@@ -209,9 +306,18 @@ w["createRoom"] = () => {
 };
 
 w["joinRoom"] = () => {
-  document.getElementById("join-room").style.display = "none";
-  document.getElementById("create-room").style.display = "none";
-  document.getElementById("join-room-section").style.display = "block";
+  runOnElements("create-room", (element) => {
+    (element as HTMLElement).style.display = "none";
+  });
+  runOnElements("join-room", (element) => {
+    (element as HTMLElement).style.display = "none";
+  });
+  runOnElements("join-room-section", (element) => {
+    (element as HTMLElement).style.display = "block";
+  });
+  runOnElements("go-back", (element) => {
+    (element as HTMLElement).style.display = "block";
+  });
 };
 
 w["submit"] = () => {
@@ -222,10 +328,23 @@ w["submit"] = () => {
     { id: uuid, room: { id }, name: name },
     (data: any) => {
       console.log("join room", data);
-      document.getElementById("room-id").innerHTML = data.id;
 
-      document.getElementById("room-id").style.display = "block";
-      document.getElementById("join-room-section").style.display = "none";
+      runOnElements("room-id-holder", (element) => {
+        element.innerHTML = data.id;
+      });
+      document.getElementById("players-list-main").style.display =
+        "inline-table";
+
+      runOnElements("create-room", (element) => {
+        (element as HTMLElement).style.display = "none";
+      });
+      runOnElements("join-room", (element) => {
+        (element as HTMLElement).style.display = "none";
+      });
+      runOnElements("join-room-section", (element) => {
+        (element as HTMLElement).style.display = "none";
+      });
+
       room = {
         id: data.id,
       };
@@ -235,13 +354,19 @@ w["submit"] = () => {
 };
 
 w["kick"] = (id: number) => {
-  socket.emit("game.request.room.kick", { room, id: id }, (data: any) => {});
+  socket.emit("game.request.room.kick", { room, id: id }, (data: any) => {
+    generatePlayerList(data.players);
+  });
+};
+
+w["showStart"] = () => {
+  kickAction();
 };
 
 function generateScoreCard(name: String, color: String, score: number): String {
   return `
     <tr>
-      <td style="font-size: 25px">
+      <td>
         <span
           style="
             height: 15px;
@@ -252,7 +377,12 @@ function generateScoreCard(name: String, color: String, score: number): String {
             border: 1px solid black;
           "
         ></span> 
-        <span style="font-size: 22px"> ${name} (${score}) </span>
+      </td>
+      <td>
+        <span> ${name} </span>
+      </td>
+      <td>
+        <span> ${score} </span>
       </td>
     </tr>
   `;
@@ -264,18 +394,68 @@ function generatePlayerList(players: any[]) {
   players.map((player) => {
     plyersTable += `
       <tr>
-        <td style="font-size: 15px">
+        <td>
            ${player.name}
         </td>
-        <td style="font-size: 15px">
+        <td>
            ${
              player.id != uuid && uuid == room.id
-               ? `<button onclick="kick('${player.id}')">Kick</button>`
+               ? `<button 
+                    type="button"
+                    class="btn btn-danger"
+                    onclick="kick('${player.id}')">Kick</button>`
                : ""
            }
         </td>
       </tr>
     `;
   });
+  runOnElements("players-list", (element) => {
+    element.innerHTML = plyersTable;
+  });
   document.getElementById("players").innerHTML = plyersTable;
+}
+
+function runOnElements(
+  className: string,
+  callback: (element: Element) => void
+) {
+  for (
+    let index = 0;
+    index < document.getElementsByClassName(className).length;
+    index++
+  ) {
+    const element = document.getElementsByClassName(className).item(index);
+    callback(element);
+  }
+}
+
+function kickAction() {
+  socket.emit(
+    "game.request.room.leave",
+    { id: uuid, room: room },
+    (data: any) => {}
+  );
+  runOnElements("game", (element) => {
+    (element as HTMLElement).style.display = "none";
+  });
+  runOnElements("start-section", (element) => {
+    (element as HTMLElement).style.display = "block";
+  });
+  runOnElements("create-room", (element) => {
+    (element as HTMLElement).style.display = "block";
+  });
+  runOnElements("join-room", (element) => {
+    (element as HTMLElement).style.display = "block";
+  });
+  runOnElements("start-game", (element) => {
+    (element as HTMLElement).style.display = "none";
+  });
+  runOnElements("go-back", (element) => {
+    (element as HTMLElement).style.display = "none";
+  });
+  runOnElements("join-room-section", (element) => {
+    (element as HTMLElement).style.display = "none";
+  });
+  document.getElementById("players-list-main").style.display = "none";
 }

@@ -18,10 +18,9 @@ module.exports = {
       template: "./src/index.html",
       filename: "./index.html",
     }),
-    // new CopyPlugin([
-    //   { from: "./src/assets/images", to: "./assets/images" },
-    //   { from: "./src/assets/js", to: "./assets/js" },
-    // ]),
+    // new CopyPlugin({
+    //   patterns: [{ from: "./src/assets", to: "./assets" }],
+    // }),
     new webpack.DefinePlugin({
       "process.env.DEPLOY_ENV": JSON.stringify(process.env.DEPLOY_ENV),
     }),
