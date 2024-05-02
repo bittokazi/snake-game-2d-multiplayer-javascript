@@ -94,6 +94,7 @@ socket.on("connect", () => {
       Swal.fire({
         title: "You have been kicked.",
         confirmButtonText: "Go back",
+        allowOutsideClick: false,
         showClass: {
           popup: `
             animate__animated
@@ -135,6 +136,7 @@ socket.on("connect", () => {
       Swal.fire({
         title: "You have been kicked.",
         confirmButtonText: "Go back",
+        allowOutsideClick: false,
         showClass: {
           popup: `
             animate__animated
@@ -188,6 +190,7 @@ socket.on("connect", () => {
       Swal.fire({
         title: "You have been kicked.",
         confirmButtonText: "Go back",
+        allowOutsideClick: false,
         showClass: {
           popup: `
             animate__animated
@@ -226,6 +229,7 @@ socket.on("connect", () => {
     Swal.fire({
       title: "Disconnected",
       confirmButtonText: "Go back",
+      allowOutsideClick: false,
       showClass: {
         popup: `
           animate__animated
@@ -275,6 +279,7 @@ w["startGame"] = () => {
 w["createRoom"] = () => {
   console.log("📨 Create room request sent");
   let name = (document.getElementsByName("name")[0] as HTMLInputElement).value;
+  if (name == "") return;
   socket.emit(
     "game.request.room.create",
     { id: uuid, target: 10, name: name },
@@ -323,6 +328,8 @@ w["joinRoom"] = () => {
 w["submit"] = () => {
   let id = (document.getElementsByName("id")[0] as HTMLInputElement).value;
   let name = (document.getElementsByName("name")[1] as HTMLInputElement).value;
+
+  if (name == "" || id == "") return;
   socket.emit(
     "game.request.room.join",
     { id: uuid, room: { id }, name: name },
