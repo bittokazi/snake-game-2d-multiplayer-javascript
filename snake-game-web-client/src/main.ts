@@ -478,5 +478,5 @@ function kickAction() {
 }
 
 runOnElements("version", (element) => {
-  (element as HTMLElement).innerHTML = info.version;
+  (element as HTMLElement).innerHTML = `v${info.version}`;
 });
