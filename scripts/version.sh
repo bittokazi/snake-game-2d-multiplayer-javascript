@@ -74,7 +74,7 @@ sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION_NEXT\"/" info.json
  
 # Commit the changes
 git add .
-git commit -am "build: bump package.json & info.json version - v$VERSION_NEXT"
+git commit -am "build: bump info.json version - v$VERSION_NEXT :bookmark:"
  
 # ==================================
 # Create git tag for new version
