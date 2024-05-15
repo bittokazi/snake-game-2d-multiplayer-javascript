@@ -5,6 +5,7 @@ import { Config } from "./config";
 import Swal from "sweetalert2";
 import { Storage } from "./app/engine/Storage";
 import "./assets/css/style.css";
+import info from "./../../info.json";
 
 let gameEngine: GameEngine;
 let room: any = {};
@@ -475,3 +476,7 @@ function kickAction() {
   });
   document.getElementById("players-list-main").style.display = "none";
 }
+
+runOnElements("version", (element) => {
+  (element as HTMLElement).innerHTML = info.version;
+});

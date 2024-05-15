@@ -8,12 +8,13 @@ console.log("🙭 Starting...");
 
 const app = express();
 const httpServer = http.createServer(app);
+const host = process.env.HOST || "*";
 
 console.log("🮱  Express and HTTP initiated...");
 
 const io = new socketIo.Server(httpServer, {
   cors: {
-    origin: "http://0.0.0.0:8080",
+    origin: host,
     methods: ["GET", "POST"],
   },
 });
@@ -60,5 +61,5 @@ console.log("🮱  Boot sequence completed...");
 const port = process.env.PORT || 3001;
 
 httpServer.listen(port, () => {
-  console.log(`🗲 listening on *:${port}`);
+  console.log(`🗲 listening on ${host}:${port}`);
 });

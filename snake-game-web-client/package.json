@@ -1,4 +1,7 @@
 {
+  "name": "snake-game-web-client",
+  "version": "0.0.1",
+  "description": "snake-game-web-client",
   "scripts": {
     "start": "npx webpack serve --allowed-hosts all",
     "build": "DEPLOY_ENV=prod webpack"

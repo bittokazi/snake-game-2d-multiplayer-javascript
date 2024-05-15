@@ -1,7 +1,7 @@
 {
-  "name": "socket-io-snake-com-server",
+  "name": "snake-game-server",
   "version": "0.0.1",
-  "description": "socket-io-snake-com-server",
+  "description": "snake-game-server",
   "scripts": {
     "start": "node build/index.js",
     "start:dev": "npx nodemon",
