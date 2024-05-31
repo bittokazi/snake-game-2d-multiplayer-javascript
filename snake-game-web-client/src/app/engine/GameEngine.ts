@@ -24,6 +24,7 @@ export class GameEngine {
   private startTimer: Timer;
   private isExit: boolean = false;
   private gameEngineInstanceId = Math.random().toString(36).substring(7);
+  private inputController: InputController;
 
   constructor(
     private uuid: string,
@@ -118,7 +119,7 @@ export class GameEngine {
     //   this.food,
     //   "yellow"
     // ).init();
-    new InputController((direction: SnakeDirection) => {
+    this.inputController = new InputController((direction: SnakeDirection) => {
       console.log("💠 Move command ⏩ ", direction);
       if (this.started) {
         this.snakes.get(this.uuid).move(direction);
@@ -143,8 +144,6 @@ export class GameEngine {
       (1000 / 60) * (60 / FRAMES_PER_SECOND) - (1000 / 60) * 0.5;
     let lastFrameTime = 0;
     let canvas = (time: any) => {
-      console.log("requesting frame from [" + this.gameEngineInstanceId + "]");
-
       if (this.isExit) return;
       if (time - lastFrameTime < FRAME_MIN_TIME) {
         requestAnimationFrame(canvas);
@@ -222,6 +221,7 @@ export class GameEngine {
   }
 
   exit() {
+    this.inputController.clearInputListners();
     this.isExit = true;
   }
 }

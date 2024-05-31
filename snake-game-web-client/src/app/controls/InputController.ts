@@ -1,12 +1,26 @@
 import { SnakeDirection } from "../models/SnakeDirection";
 
 export class InputController {
+  keyDownHandler: any = null;
+  touchStartHandler: any = null;
+  touchMoveHandler: any = null;
+  touchEndHandler: any = null;
+
   constructor(private callback: (snakeDirection: SnakeDirection) => void) {}
 
   init(): InputController {
     let callback = this.callback;
-    document.onkeydown = function (e: KeyboardEvent) {
-      // e = e || window.event;
+
+    let ts: any = {
+      x: null,
+      y: null,
+    };
+
+    let threshold = 150;
+    let restraint = 100;
+    let allowedTime = 300;
+
+    this.keyDownHandler = function (e: KeyboardEvent) {
       if (e.key == "ArrowDown") {
         callback("down" as SnakeDirection);
       } else if (e.key == "ArrowUp") {
@@ -18,51 +32,52 @@ export class InputController {
       }
     };
 
-    let ts: any = {
-      x: null,
-      y: null,
+    this.touchStartHandler = function (e: any) {
+      ts.x = e.touches[0].clientX;
+      ts.y = e.touches[0].clientY;
     };
 
-    document.addEventListener(
-      "touchstart",
-      function (e: any) {
-        e.preventDefault();
-        ts.x = e.touches[0].clientX;
-        ts.y = e.touches[0].clientY;
-      },
-      {
-        passive: false,
-      }
-    );
-
-    document.addEventListener("touchmove", function (e: any) {
+    this.touchMoveHandler = function (e: any) {
       e.preventDefault();
-      if (!ts.x || !ts.y) {
-        return;
+    };
+
+    this.touchEndHandler = function (e: any) {
+      let te: any = {
+        x: e.changedTouches[0].clientX - ts.x,
+        y: e.changedTouches[0].clientY - ts.y,
+      };
+
+      if (Math.abs(te.x) >= threshold && Math.abs(te.y) <= restraint) {
+        let swipedir = te.x < 0 ? "left" : "right";
+        callback(swipedir as SnakeDirection);
+        e.preventDefault();
+      } else if (Math.abs(te.y) >= threshold && Math.abs(te.x) <= restraint) {
+        let swipedir = te.y < 0 ? "up" : "down";
+        callback(swipedir as SnakeDirection);
+        e.preventDefault();
       }
+    };
 
-      let xUp = e.touches[0].clientX;
-      let yUp = e.touches[0].clientY;
+    document.addEventListener("keydown", this.keyDownHandler);
 
-      var xDiff = ts.y - xUp;
-      var yDiff = ts.y - yUp;
+    document.addEventListener("touchstart", this.touchStartHandler, {
+      passive: false,
+    });
 
-      if (Math.abs(xDiff) > Math.abs(yDiff)) {
-        if (xDiff > 0) {
-          callback("left" as SnakeDirection);
-        } else {
-          callback("right" as SnakeDirection);
-        }
-      } else {
-        if (yDiff > 0) {
-          callback("up" as SnakeDirection);
-        } else {
-          callback("down" as SnakeDirection);
-        }
-      }
-      ts.x = null;
-      ts.y = null;
+    document.addEventListener("touchmove", this.touchMoveHandler, {
+      passive: false,
+    });
+
+    document.addEventListener("touchend", this.touchEndHandler, {
+      passive: false,
     });
     return this;
+  }
+
+  clearInputListners() {
+    document.removeEventListener("keydown", this.keyDownHandler);
+    document.removeEventListener("touchstart", this.touchStartHandler, false);
+    document.removeEventListener("touchmove", this.touchMoveHandler, false);
+    document.removeEventListener("touchend", this.touchEndHandler, false);
   }
 }
