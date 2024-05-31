@@ -26,6 +26,7 @@ export class InputController {
     document.addEventListener(
       "touchstart",
       function (e: any) {
+        e.preventDefault();
         ts.x = e.touches[0].clientX;
         ts.y = e.touches[0].clientY;
       },
@@ -34,39 +35,34 @@ export class InputController {
       }
     );
 
-    document.addEventListener(
-      "touchmove",
-      function (e: any) {
-        if (!ts.x || !ts.y) {
-          return;
-        }
-
-        let xUp = e.touches[0].clientX;
-        let yUp = e.touches[0].clientY;
-
-        var xDiff = ts.y - xUp;
-        var yDiff = ts.y - yUp;
-
-        if (Math.abs(xDiff) > Math.abs(yDiff)) {
-          if (xDiff > 0) {
-            callback("left" as SnakeDirection);
-          } else {
-            callback("right" as SnakeDirection);
-          }
-        } else {
-          if (yDiff > 0) {
-            callback("up" as SnakeDirection);
-          } else {
-            callback("down" as SnakeDirection);
-          }
-        }
-        ts.x = null;
-        ts.y = null;
-      },
-      {
-        passive: false,
+    document.addEventListener("touchmove", function (e: any) {
+      e.preventDefault();
+      if (!ts.x || !ts.y) {
+        return;
       }
-    );
+
+      let xUp = e.touches[0].clientX;
+      let yUp = e.touches[0].clientY;
+
+      var xDiff = ts.y - xUp;
+      var yDiff = ts.y - yUp;
+
+      if (Math.abs(xDiff) > Math.abs(yDiff)) {
+        if (xDiff > 0) {
+          callback("left" as SnakeDirection);
+        } else {
+          callback("right" as SnakeDirection);
+        }
+      } else {
+        if (yDiff > 0) {
+          callback("up" as SnakeDirection);
+        } else {
+          callback("down" as SnakeDirection);
+        }
+      }
+      ts.x = null;
+      ts.y = null;
+    });
     return this;
   }
 }
