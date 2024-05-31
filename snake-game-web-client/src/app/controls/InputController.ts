@@ -35,7 +35,7 @@ export class InputController {
     );
 
     document.addEventListener(
-      "touchstart",
+      "touchmove",
       function (e: any) {
         if (!ts.x || !ts.y) {
           return;
