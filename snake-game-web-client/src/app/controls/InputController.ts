@@ -29,19 +29,31 @@ export class InputController {
     };
 
     document.ontouchmove = function (e: any) {
-      let te: any = {
-        x: e.changedTouches[0].clientX,
-        y: e.changedTouches[0].clientY,
-      };
-      if (ts.y > te.y - 5) {
-        callback("up" as SnakeDirection);
-      } else if (ts.y < te.y + 5) {
-        callback("down" as SnakeDirection);
-      } else if (ts.x > te.x - 1) {
-        callback("left" as SnakeDirection);
-      } else if (ts.x < te.x + 1) {
-        callback("right" as SnakeDirection);
+      if (!ts.x || !ts.y) {
+        return;
       }
+
+      let xUp = e.touches[0].clientX;
+      let yUp = e.touches[0].clientY;
+
+      var xDiff = ts.y - xUp;
+      var yDiff = ts.y - yUp;
+
+      if (Math.abs(xDiff) > Math.abs(yDiff)) {
+        if (xDiff > 0) {
+          callback("left" as SnakeDirection);
+        } else {
+          callback("right" as SnakeDirection);
+        }
+      } else {
+        if (yDiff > 0) {
+          callback("up" as SnakeDirection);
+        } else {
+          callback("down" as SnakeDirection);
+        }
+      }
+      ts.x = null;
+      ts.y = null;
     };
 
     this.initUiInput();
