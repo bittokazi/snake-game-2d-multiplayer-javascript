@@ -24,22 +24,22 @@ export class InputController {
     };
 
     document.ontouchstart = function (e: any) {
-      ts.x = e.originalEvent.touches[0].clientX;
-      ts.y = e.originalEvent.touches[0].clientY;
+      ts.x = e.touches[0].clientX;
+      ts.y = e.touches[0].clientY;
     };
 
     document.ontouchmove = function (e: any) {
       let te: any = {
-        x: e.originalEvent.changedTouches[0].clientX,
-        y: e.originalEvent.changedTouches[0].clientY,
+        x: e.changedTouches[0].clientX,
+        y: e.changedTouches[0].clientY,
       };
-      if (ts.y > te.y + 5) {
+      if (ts.y > te.y - 5) {
         callback("down" as SnakeDirection);
-      } else if (ts.y < te.y - 5) {
+      } else if (ts.y < te.y + 5) {
         callback("up" as SnakeDirection);
-      } else if (ts.x > te.x + 5) {
+      } else if (ts.x > te.x - 5) {
         callback("right" as SnakeDirection);
-      } else if (ts.x < te.x - 5) {
+      } else if (ts.x < te.x + 5) {
         callback("left" as SnakeDirection);
       }
     };
