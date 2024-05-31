@@ -34,13 +34,13 @@ export class InputController {
         y: e.changedTouches[0].clientY,
       };
       if (ts.y > te.y - 5) {
-        callback("down" as SnakeDirection);
-      } else if (ts.y < te.y + 5) {
         callback("up" as SnakeDirection);
-      } else if (ts.x > te.x - 5) {
-        callback("right" as SnakeDirection);
-      } else if (ts.x < te.x + 5) {
+      } else if (ts.y < te.y + 5) {
+        callback("down" as SnakeDirection);
+      } else if (ts.x > te.x - 1) {
         callback("left" as SnakeDirection);
+      } else if (ts.x < te.x + 1) {
+        callback("right" as SnakeDirection);
       }
     };
 
