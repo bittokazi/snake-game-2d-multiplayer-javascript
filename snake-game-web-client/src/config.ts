@@ -1,9 +1,9 @@
 const devConfig = {
-  API_BASE_URL: "http://0.0.0.0:3001",
+  API_BASE_URL: `${window.location.hostname}:3001`,
 };
 
 const prodConfig = {
-  API_BASE_URL: "/",
+  API_BASE_URL: `/`,
 };
 
 let selectedConf = devConfig;
