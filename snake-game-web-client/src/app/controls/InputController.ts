@@ -23,55 +23,50 @@ export class InputController {
       y: null,
     };
 
-    document.ontouchstart = function (e: any) {
-      ts.x = e.touches[0].clientX;
-      ts.y = e.touches[0].clientY;
-    };
-
-    document.ontouchmove = function (e: any) {
-      if (!ts.x || !ts.y) {
-        return;
+    document.addEventListener(
+      "touchstart",
+      function (e: any) {
+        ts.x = e.touches[0].clientX;
+        ts.y = e.touches[0].clientY;
+      },
+      {
+        passive: false,
       }
+    );
 
-      let xUp = e.touches[0].clientX;
-      let yUp = e.touches[0].clientY;
-
-      var xDiff = ts.y - xUp;
-      var yDiff = ts.y - yUp;
-
-      if (Math.abs(xDiff) > Math.abs(yDiff)) {
-        if (xDiff > 0) {
-          callback("left" as SnakeDirection);
-        } else {
-          callback("right" as SnakeDirection);
+    document.addEventListener(
+      "touchstart",
+      function (e: any) {
+        if (!ts.x || !ts.y) {
+          return;
         }
-      } else {
-        if (yDiff > 0) {
-          callback("up" as SnakeDirection);
+
+        let xUp = e.touches[0].clientX;
+        let yUp = e.touches[0].clientY;
+
+        var xDiff = ts.y - xUp;
+        var yDiff = ts.y - yUp;
+
+        if (Math.abs(xDiff) > Math.abs(yDiff)) {
+          if (xDiff > 0) {
+            callback("left" as SnakeDirection);
+          } else {
+            callback("right" as SnakeDirection);
+          }
         } else {
-          callback("down" as SnakeDirection);
+          if (yDiff > 0) {
+            callback("up" as SnakeDirection);
+          } else {
+            callback("down" as SnakeDirection);
+          }
         }
+        ts.x = null;
+        ts.y = null;
+      },
+      {
+        passive: false,
       }
-      ts.x = null;
-      ts.y = null;
-    };
-
-    this.initUiInput();
+    );
     return this;
-  }
-
-  initUiInput() {
-    document.getElementById("up").addEventListener("click", () => {
-      this.callback("up" as SnakeDirection);
-    });
-    document.getElementById("down").addEventListener("click", () => {
-      this.callback("down" as SnakeDirection);
-    });
-    document.getElementById("left").addEventListener("click", () => {
-      this.callback("left" as SnakeDirection);
-    });
-    document.getElementById("right").addEventListener("click", () => {
-      this.callback("right" as SnakeDirection);
-    });
   }
 }
