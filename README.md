@@ -1,4 +1,4 @@
-# Snake Game 2d Multiplayer
+# Snake Game 2d Multiplayer in Javascript/Typescript
 
 ## How to run locally
 
@@ -9,20 +9,24 @@
 ### Run Backend Server
 
 > cd snake-game-server
+
 > npm install
+
 > npm run start:dev
 
 ### Run Javascript Game Client
 
 > cd snake-game-web-client
+
 > npm install
+
 > npm run start
 
 ### Access game from browser
 
 http://127.0.0.1:8080
 
-## How to run docker container locally
+## How to run in docker container locally
 
 ### Requirements
 
@@ -32,6 +36,7 @@ http://127.0.0.1:8080
 ### Run Docker Container
 
 > docker-compose build
+
 > docker-compose up -d
 
 ### Access game from browser (Docker Run)
