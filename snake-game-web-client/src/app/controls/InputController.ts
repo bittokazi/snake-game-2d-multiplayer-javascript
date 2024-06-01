@@ -47,7 +47,7 @@ export class InputController {
         y: e.changedTouches[0].clientY - ts.y,
       };
 
-      if (Math.abs(te.x) >= threshold && Math.abs(te.y) <= restraint) {
+      if (Math.abs(te.x) >= threshold) {
         let swipedir = te.x < 0 ? "left" : "right";
         callback(swipedir as SnakeDirection);
         e.preventDefault();
