@@ -31,6 +31,7 @@ http://127.0.0.1:8080
 ### Requirements
 
 - Docker
+
 - Docker Compose
 
 ### Run Docker Container
@@ -42,3 +43,7 @@ http://127.0.0.1:8080
 ### Access game from browser (Docker Run)
 
 http://127.0.0.1:43001
+
+## Live version
+
+[https://snake.game.bittokazi.com](https://snake.game.bittokazi.com)
